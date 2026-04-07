@@ -8,31 +8,26 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    
 
+    uri = os.getenv("DATABASE_URL", "sqlite:///shop.db")
 
-uri = os.getenv("DATABASE_URL", "sqlite:///shop.db")
-
-# Fix for Supabase / Render PostgreSQL
-if uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
+    # Fix for Supabase / Render PostgreSQL
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = uri
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.secret_key = "ragalia-secret-key-change-in-production"
 
-
-    
-
     db.init_app(app)
 
-    from routes.pages     import pages_bp
-    from routes.products  import products_bp
+    from routes.pages import pages_bp
+    from routes.products import products_bp
     from routes.assistant import assistant_bp
-    from routes.admin     import admin_bp
+    from routes.admin import admin_bp
 
     app.register_blueprint(pages_bp)
-    app.register_blueprint(products_bp,  url_prefix="/api")
+    app.register_blueprint(products_bp, url_prefix="/api")
     app.register_blueprint(assistant_bp, url_prefix="/api")
     app.register_blueprint(admin_bp)
 
@@ -54,6 +49,7 @@ if uri.startswith("postgres://"):
         seed_products(db)
 
     return app
+
 
 if __name__ == "__main__":
     app = create_app()
