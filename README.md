@@ -1,6 +1,6 @@
-# 🛍️ Maison — RAG-Powered E-Commerce Store
+# 🛍️ Ragalia — RAG-Powered E-Commerce Store
 
-A clean, minimal general store built with **Flask + SQLite** on the backend and **pure HTML/CSS/JS** (Jinja2 templates) on the frontend. Features a floating AI shopping assistant powered by **Claude** using **Retrieval-Augmented Generation (RAG)**.
+A clean, minimal general store built with **Flask + SQLite** on the backend and **pure HTML/CSS/JS** (Jinja2 templates) on the frontend. Features a floating AI shopping assistant powered by **Groq** using **Retrieval-Augmented Generation (RAG)**.
 
 ---
 
@@ -11,7 +11,7 @@ A clean, minimal general store built with **Flask + SQLite** on the backend and 
 | 🛒 Product browsing | Grid layout with category sidebar and price filters |
 | 🔍 Live search | Filters products by name, description, and tags |
 | 📄 Product detail pages | Full info, tags, breadcrumb navigation |
-| 🤖 AI chat assistant | Floating bubble — asks Claude about any product |
+| 🤖 AI chat assistant | Floating bubble — asks Groq about any product |
 | 🧠 RAG pipeline | Retrieves relevant products before every AI call |
 | 💾 SQLite database | Zero setup, auto-seeded with 20 products on first run |
 | 📱 Responsive | Works on desktop and mobile |
