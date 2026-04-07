@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — Ragalia{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+  <div class="detail-inner">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/" class="bread-link">Shop</a>
+      <span class="bread-sep">›</span>
+      <a href="/?category={{ product.category | urlencode }}" class="bread-link">{{ product.category }}</a>
+      <span class="bread-sep">›</span>
+      <span>{{ product.name }}</span>
+    </nav>
+
+    <div class="detail-grid">
+
+      <!-- Image column -->
+      <div class="img-sticky">
+        <div class="img-frame">
+          <img
+            src="{{ product.image_url or 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600' }}"
+            alt="{{ product.name }}"
+            onerror="this.src='https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=600'"
+          />
+        </div>
+        <div class="stock-pill">
+          {% if product.in_stock %}
+            <span class="stock-dot"></span> In Stock
+          {% else %}
+            <span class="stock-dot out"></span> Out of Stock
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Info column -->
+      <div>
+        <span class="detail-cat">{{ product.category }}</span>
+        <h1 class="detail-name">{{ product.name }}</h1>
+        <div class="detail-price">${{ "%.2f" | format(product.price) }}</div>
+        <p class="detail-desc">{{ product.description }}</p>
+
+        {% if product.tags %}
+        <div class="tags">
+          {% for tag in product.tags.split() %}
+            <a href="/?search={{ tag }}" class="tag">#{{ tag }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="detail-actions">
+          <button class="btn-ask" onclick="askAboutProduct()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Ask AI about this product
+          </button>
+          <a href="/" class="btn-back">← Continue shopping</a>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Category</span>
+            <span class="meta-val">{{ product.category }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Availability</span>
+            <span class="meta-val">{{ "In Stock" if product.in_stock else "Out of Stock" }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Price</span>
+            <span class="meta-val">${{ "%.2f" | format(product.price) }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Product ID</span>
+            <span class="meta-val">#{{ product.id }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function askAboutProduct() {
+    window.dispatchEvent(new CustomEvent('open-chat', {
+      detail: { question: 'Tell me more about the {{ product.name }}. Is it worth buying?' }
+    }));
+  }
+</script>
+{% endblock %}

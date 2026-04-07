@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — Ragalia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}"/>
+</head>
+<body class="admin-body">
+
+<!-- Admin Navbar -->
+<nav class="admin-nav">
+  <div class="admin-nav-inner">
+    <div class="admin-nav-left">
+      <a href="/" class="logo">
+        <div class="logo-mark">R</div>
+        <span class="logo-text">Ragalia</span>
+      </a>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <div class="admin-nav-right">
+      <a href="/" class="admin-nav-link" target="_blank">View Store ↗</a>
+      <a href="/admin/logout" class="admin-nav-link logout">Sign Out</a>
+    </div>
+  </div>
+</nav>
+
+<div class="admin-page">
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <span class="stat-num">{{ total }}</span>
+      <span class="stat-label">Total Products</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num">{{ in_stock }}</span>
+      <span class="stat-label">In Stock</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num">{{ total - in_stock }}</span>
+      <span class="stat-label">Out of Stock</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num">{{ categories|length }}</span>
+      <span class="stat-label">Categories</span>
+    </div>
+  </div>
+
+  <div class="admin-grid">
+
+    <!-- ── Add Product Form ── -->
+    <aside class="add-panel">
+      <h2 class="panel-title">Add New Product</h2>
+
+      <form method="POST" action="/admin/add" class="product-form">
+
+        <div class="field-group">
+          <label class="field-label">Product Name *</label>
+          <input class="field-input" type="text" name="name" placeholder="e.g. Sony WH-1000XM5" required/>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Price ($) *</label>
+            <input class="field-input" type="number" name="price" step="0.01" min="0" placeholder="0.00" required/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">In Stock</label>
+            <label class="toggle-wrap">
+              <input type="checkbox" name="in_stock" checked/>
+              <span class="toggle"></span>
+              <span class="toggle-label">Available</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Category *</label>
+          <select class="field-input" name="category" id="cat-select" onchange="toggleNewCat(this)">
+            <option value="">— Select category —</option>
+            {% for cat in categories %}
+              <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+            <option value="__new__">+ Add new category…</option>
+          </select>
+        </div>
+
+        <div class="field-group" id="new-cat-group" style="display:none">
+          <label class="field-label">New Category Name</label>
+          <input class="field-input" type="text" name="new_category" placeholder="e.g. Toys & Games"/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Description *</label>
+          <textarea class="field-input field-textarea" name="description"
+            placeholder="Detailed product description…" required></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Tags <span class="field-hint">(space-separated)</span></label>
+          <input class="field-input" type="text" name="tags" placeholder="wireless audio sony headphones"/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Image URL <span class="field-hint">(Unsplash link works great)</span></label>
+          <input class="field-input" type="url" name="image_url" placeholder="https://images.unsplash.com/…"/>
+        </div>
+
+        <button type="submit" class="submit-btn">Add Product →</button>
+      </form>
+    </aside>
+
+    <!-- ── Product Table ── -->
+    <section class="table-panel">
+      <div class="table-header">
+        <h2 class="panel-title">All Products <span class="count-badge">{{ total }}</span></h2>
+        <input class="table-search" type="text" placeholder="Search table…" oninput="filterTable(this.value)"/>
+      </div>
+
+      {% if products %}
+      <div class="table-wrap">
+        <table class="product-table" id="product-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in products %}
+            <tr data-search="{{ p.name|lower }} {{ p.category|lower }} {{ p.tags|lower }}">
+              <td class="td-product">
+                <img class="table-img"
+                  src="{{ p.image_url or 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=80' }}"
+                  alt="{{ p.name }}"
+                  onerror="this.src='https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=80'"/>
+                <div>
+                  <div class="td-name">{{ p.name }}</div>
+                  <div class="td-tags">{{ p.tags[:40] }}{% if p.tags|length > 40 %}…{% endif %}</div>
+                </div>
+              </td>
+              <td><span class="cat-pill">{{ p.category }}</span></td>
+              <td class="td-price">${{ "%.2f"|format(p.price) }}</td>
+              <td>
+                {% if p.in_stock %}
+                  <span class="status-pill status-in">In Stock</span>
+                {% else %}
+                  <span class="status-pill status-out">Out of Stock</span>
+                {% endif %}
+              </td>
+              <td class="td-actions">
+                <button class="action-btn edit-btn"
+                  onclick="openEdit({{ p.id }}, '{{ p.name|e }}', {{ p.price }}, '{{ p.category|e }}',
+                    '{{ p.description|e|replace('\n',' ') }}', '{{ p.tags|e }}',
+                    '{{ p.image_url|e }}', {{ 'true' if p.in_stock else 'false' }})">
+                  Edit
+                </button>
+                <form method="POST" action="/admin/delete/{{ p.id }}" style="display:inline"
+                  onsubmit="return confirm('Delete \'{{ p.name }}\'? This cannot be undone.')">
+                  <button type="submit" class="action-btn delete-btn">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-table">
+        <p>No products yet. Add your first product using the form.</p>
+      </div>
+      {% endif %}
+    </section>
+
+  </div><!-- /admin-grid -->
+</div><!-- /admin-page -->
+
+<!-- ── Edit Modal ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeEdit()"></div>
+<div class="modal" id="edit-modal">
+  <div class="modal-head">
+    <h3 class="modal-title">Edit Product</h3>
+    <button class="modal-close" onclick="closeEdit()">✕</button>
+  </div>
+  <form method="POST" id="edit-form" class="product-form">
+
+    <div class="field-group">
+      <label class="field-label">Product Name *</label>
+      <input class="field-input" type="text" name="name" id="edit-name" required/>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label">Price ($) *</label>
+        <input class="field-input" type="number" name="price" id="edit-price" step="0.01" min="0" required/>
+      </div>
+      <div class="field-group">
+        <label class="field-label">In Stock</label>
+        <label class="toggle-wrap">
+          <input type="checkbox" name="in_stock" id="edit-stock"/>
+          <span class="toggle"></span>
+          <span class="toggle-label">Available</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Category *</label>
+      <input class="field-input" type="text" name="category" id="edit-category" required/>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Description *</label>
+      <textarea class="field-input field-textarea" name="description" id="edit-description" required></textarea>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Tags</label>
+      <input class="field-input" type="text" name="tags" id="edit-tags"/>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Image URL</label>
+      <input class="field-input" type="url" name="image_url" id="edit-image-url"/>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="cancel-btn" onclick="closeEdit()">Cancel</button>
+      <button type="submit" class="submit-btn">Save Changes →</button>
+    </div>
+  </form>
+</div>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

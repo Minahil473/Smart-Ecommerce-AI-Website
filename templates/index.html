@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Ragalia — Shop All Products{% endblock %}
+{% block nav_shop %}active{% endblock %}
+
+{% block content %}
+<div class="page">
+
+  <!-- Hero -->
+  <section class="hero">
+    <p class="hero-eyebrow">Curated for modern living</p>
+    <h1 class="hero-title">The Online Store</h1>
+    <p class="hero-sub">
+      Electronics, home goods, clothing &amp; more.<br>
+      Ask our AI assistant to find exactly what you need.
+    </p>
+    <form class="search-form" id="search-form">
+      <div class="search-wrap">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+          <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input class="search-input" id="search-input" placeholder="Search products…" autocomplete="off" />
+        <button type="submit" class="search-btn">Search</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Body -->
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="filter-group">
+        <p class="filter-label">Category</p>
+        <div id="cat-filters"><!-- injected by JS --></div>
+      </div>
+
+      <div class="filter-group">
+        <p class="filter-label">Max Price</p>
+        <button class="filter-btn price-btn active" data-p="" onclick="setMaxPrice('')">Any price</button>
+        <button class="filter-btn price-btn" data-p="25"  onclick="setMaxPrice('25')">Under $25</button>
+        <button class="filter-btn price-btn" data-p="50"  onclick="setMaxPrice('50')">Under $50</button>
+        <button class="filter-btn price-btn" data-p="100" onclick="setMaxPrice('100')">Under $100</button>
+        <button class="filter-btn price-btn" data-p="250" onclick="setMaxPrice('250')">Under $250</button>
+        <button class="filter-btn price-btn" data-p="500" onclick="setMaxPrice('500')">Under $500</button>
+      </div>
+
+      <button class="clear-btn" id="clear-btn" onclick="clearFilters()" style="display:none">
+        ✕ Clear all filters
+      </button>
+    </aside>
+
+    <!-- Product grid -->
+    <section>
+      <div class="results-bar">
+        <span class="results-count" id="results-count">Loading…</span>
+      </div>
+      <div class="grid" id="product-grid">
+        <!-- skeletons then cards injected by JS -->
+      </div>
+    </section>
+
+  </div>
+</div>
+{% endblock %}
